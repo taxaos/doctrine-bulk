@@ -1,5 +1,6 @@
 <?php
-declare(strict_types = 1);
+
+declare(strict_types=1);
 
 namespace Tests\Entity;
 
@@ -14,7 +15,7 @@ use Doctrine\ORM\Mapping as ORM;
 class Book
 {
     /**
-     * @ORM\Column(name="id", type="integer", nullable=false, options={"unsigned"=true})
+     * @ORM\Column(name="id",                   type="integer", nullable=false, options={"unsigned"=true})
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="IDENTITY")
      */
@@ -30,7 +31,7 @@ class Book
      *
      * @ORM\ManyToOne(targetEntity="Author")
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="author_id", referencedColumnName="id", nullable=true)
+     * @ORM\JoinColumn(name="author_id",     referencedColumnName="id", nullable=true)
      * })
      */
     protected Author $author;

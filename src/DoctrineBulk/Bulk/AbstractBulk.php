@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace DoctrineBulk\Bulk;
@@ -25,19 +26,29 @@ use ReflectionProperty;
  */
 abstract class AbstractBulk
 {
-    /** @var EntityManagerInterface */
+    /**
+     * @var EntityManagerInterface
+     */
     protected EntityManagerInterface $manager;
 
-    /** @var ReflectionProperty[] */
+    /**
+     * @var ReflectionProperty[]
+     */
     private array $cachedReflProps = [];
 
-    /** @var ReflectionClass */
+    /**
+     * @var ReflectionClass
+     */
     protected ReflectionClass $reflection;
 
-    /** @var string */
+    /**
+     * @var string
+     */
     protected string $class;
 
-    /** @var Metadata */
+    /**
+     * @var Metadata
+     */
     protected Metadata $metadata;
 
     /**
@@ -187,8 +198,11 @@ abstract class AbstractBulk
      *
      * @throws FieldNotFoundException|ReflectionException
      */
-    protected function getJoinedEntityValue(ColumnMetadataInterface $column, ClassValue $classValue, string $field): ClassValue
-    {
+    protected function getJoinedEntityValue(
+        ColumnMetadataInterface $column,
+        ClassValue $classValue,
+        string $field
+    ): ClassValue {
         if (!$classValue->isInitialised()) {
             return $classValue;
         }

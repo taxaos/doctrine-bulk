@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace DoctrineBulk\Exceptions;
@@ -24,6 +25,7 @@ final class EntityNotSupportedException extends DoctrineBulkBaseException
                 get_class($entity),
                 HashedIdEntityInterface::class,
                 HashedIdGenerator::class
-            ));
+            )
+        );
     }
 }

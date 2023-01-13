@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace DoctrineBulk\Bulk;
@@ -16,7 +17,9 @@ use DoctrineBulk\Generator\BulkGeneratorInterface;
  */
 final class MetadataLoader
 {
-    /** @var Metadata[] */
+    /**
+     * @var Metadata[]
+     */
     private static array $metadata = [];
 
     // Supported Join types.
@@ -72,7 +75,8 @@ final class MetadataLoader
                     $mapping['type'],
                     $nullable,
                     $hasDefault,
-                    $defaultValue)
+                    $defaultValue
+                )
             );
         }
 
@@ -85,9 +89,12 @@ final class MetadataLoader
             $bulkMetadata->setGenerator($generator);
         }
 
-        $associations = array_filter($metadata->getAssociationMappings(), static function (array $association) {
-            return array_key_exists($association['type'], self::SUPPORTED_JOINS);
-        });
+        $associations = array_filter(
+            $metadata->getAssociationMappings(),
+            static function (array $association) {
+                return array_key_exists($association['type'], self::SUPPORTED_JOINS);
+            }
+        );
 
         foreach ($associations as $association) {
             $column = $association['joinColumns'][0] ?? [];
@@ -95,7 +102,8 @@ final class MetadataLoader
                 continue; // looks broken...
             }
             // ONE_TO_ONE  does not have the 'nullable' key, but creates tables that are nullable
-            $nullable = $association['type'] === ClassMetadataInfo::ONE_TO_ONE || (isset($column['nullable']) && $column['nullable']);
+            $nullable = $association['type'] === ClassMetadataInfo::ONE_TO_ONE
+                || (isset($column['nullable']) && $column['nullable']);
             $defaultValue = null;
             $joinColumnMetadata = new JoinColumnMetadata(
                 $column['name'],

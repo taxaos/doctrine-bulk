@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Tests\Entity;
 
@@ -15,7 +17,7 @@ trait CreatedAtTrait
      * )
      */
     public ?DateTime $createdAt = null;
-    
+
     public function getCreatedAt(): ?DateTime
     {
         return $this->createdAt;

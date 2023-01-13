@@ -1,5 +1,6 @@
 <?php
-declare(strict_types = 1);
+
+declare(strict_types=1);
 
 namespace DoctrineBulk\Bulk;
 
@@ -23,7 +24,7 @@ class ClassValue
     /**
      * ClassValue constructor.
      *
-     * @param bool $initialised
+     * @param bool  $initialised
      * @param mixed $value
      */
     private function __construct(bool $initialised, mixed $value)
@@ -35,7 +36,7 @@ class ClassValue
     /**
      * Helper for building ClassValue from a class variable that is set to a value
      *
-     * @param mixed $value
+     * @param  mixed $value
      * @return ClassValue
      */
     public static function initialised(mixed $value): ClassValue

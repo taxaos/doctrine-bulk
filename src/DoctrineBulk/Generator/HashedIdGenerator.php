@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace DoctrineBulk\Generator;
@@ -14,7 +15,7 @@ class HashedIdGenerator extends AbstractIdGenerator implements BulkGeneratorInte
 {
     /**
      * @inheritdoc
-     * @throws EntityNotSupportedException
+     * @throws     EntityNotSupportedException
      */
     public function generate(EntityManager $em, $entity): string
     {
@@ -30,7 +31,7 @@ class HashedIdGenerator extends AbstractIdGenerator implements BulkGeneratorInte
 
     /**
      * @inheritdoc
-     * @throws EntityNotSupportedException|CannotGenerateIdException
+     * @throws     EntityNotSupportedException|CannotGenerateIdException
      */
     public function generateBulk(EntityManagerInterface $manager, string $class, array $entity): string
     {

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace DoctrineBulk\Bulk;
@@ -25,7 +26,9 @@ class BulkUpsert extends AbstractBulk
 
     public const DEFAULT_ROWS = 1000;
 
-    /** @var array<int, array<mixed, mixed>> */
+    /**
+     * @var array<int, array<mixed, mixed>>
+     */
     private array $values = [];
 
     /**
@@ -45,7 +48,9 @@ class BulkUpsert extends AbstractBulk
             }
         }
         foreach ($this->metadata->getFields() as $field => $column) {
-            /** @noinspection NotOptimalIfConditionsInspection */
+            /**
+             * @noinspection NotOptimalIfConditionsInspection
+             */
             if (!$column->isNullable() && !array_key_exists($field, $data)) {
                 throw new NullValueException($this->class, $field);
             }
@@ -124,7 +129,6 @@ class BulkUpsert extends AbstractBulk
         } catch (TableNotFoundException $exception) {
             return true;
         }
-
     }
 
     /**
@@ -201,7 +205,19 @@ class BulkUpsert extends AbstractBulk
                 ', ',
                 $dbFields
             ),
-            trim(str_repeat(sprintf('(%s), ', implode(', ', array_fill(0, count($fields), '?'))), count($values)), ', '),
+            trim(
+                str_repeat(
+                    sprintf(
+                        '(%s), ',
+                        implode(
+                            ', ',
+                            array_fill(0, count($fields), '?')
+                        )
+                    ),
+                    count($values)
+                ),
+                ', '
+            ),
             implode(', ', $onDuplicateKeyParts)
         );
 
@@ -213,7 +229,8 @@ class BulkUpsert extends AbstractBulk
                 $index++;
                 $value = $row[$name] ?? null;
                 if (
-                    in_array($name, $this->metadata->getIdFields(), true) && $generate = $this->metadata->getGenerator()) {
+                    in_array($name, $this->metadata->getIdFields(), true) && $generate = $this->metadata->getGenerator()
+                ) {
                     $value = $generate->generateBulk($this->manager, $this->class, $row);
                 }
                 $this->bind($statement, $index, $this->metadata->getField($name), $value);
@@ -222,7 +239,8 @@ class BulkUpsert extends AbstractBulk
 
         $statement->executeQuery();
 
-        $noLastId = ($flags & self::FLAG_NO_RETURN_ID) === self::FLAG_NO_RETURN_ID || $this->metadata->getGenerator() !== null;
+        $noLastId = ($flags & self::FLAG_NO_RETURN_ID) === self::FLAG_NO_RETURN_ID
+            || $this->metadata->getGenerator() !== null;
 
         if ($noLastId) {
             return null;

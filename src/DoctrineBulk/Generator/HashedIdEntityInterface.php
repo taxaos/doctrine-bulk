@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace DoctrineBulk\Generator;
@@ -23,7 +24,7 @@ interface HashedIdEntityInterface
      * Transform field value to hash-id representation.
      *
      * @param string $name
-     * @param mixed $value
+     * @param mixed  $value
      *
      * @return mixed
      */

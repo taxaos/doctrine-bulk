@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace DoctrineBulk\Exceptions;
@@ -12,6 +13,7 @@ final class WrongEntityException extends DoctrineBulkBaseException
                 'Bulk class created for "%s", but "%s" added.',
                 $excepted,
                 get_class($actual)
-            ));
+            )
+        );
     }
 }

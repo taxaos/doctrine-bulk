@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace DoctrineBulk\Exceptions;
@@ -21,6 +22,7 @@ final class CannotGenerateIdException extends DoctrineBulkBaseException
                 'Cannot generate Id for "%s" required field "%s" not exists!',
                 $entity,
                 $field
-            ));
+            )
+        );
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace DoctrineBulk\Exceptions;
@@ -14,6 +15,7 @@ final class NotSupportedIdGeneratorException extends DoctrineBulkBaseException
                 'To use generator "%s" in bulk please implement "%s" interface',
                 get_class($name),
                 BulkGeneratorInterface::class
-            ));
+            )
+        );
     }
 }

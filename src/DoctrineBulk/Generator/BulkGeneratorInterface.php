@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace DoctrineBulk\Generator;
@@ -14,8 +15,8 @@ interface BulkGeneratorInterface
      * Generate ID by entity data.
      *
      * @param EntityManagerInterface $manager
-     * @param string $class
-     * @param array<string, mixed> $entity
+     * @param string                 $class
+     * @param array<string, mixed>   $entity
      *
      * @return string
      */

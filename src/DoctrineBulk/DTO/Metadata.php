@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace DoctrineBulk\DTO;
@@ -10,7 +11,9 @@ use DoctrineBulk\Generator\BulkGeneratorInterface;
  */
 final class Metadata
 {
-    /** @var ColumnMetadataInterface[] */
+    /**
+     * @var ColumnMetadataInterface[]
+     */
     private array $fields = [];
 
     /**
@@ -80,7 +83,7 @@ final class Metadata
     }
 
     /**
-     * @param array<int, string> $idFields
+     * @param  array<int, string> $idFields
      * @return void
      */
     public function setIdFields(array $idFields): void
