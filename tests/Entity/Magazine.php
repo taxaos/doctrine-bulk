@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Tests\Entity;
@@ -37,7 +38,7 @@ class Magazine
     /**
      * @ORM\ManyToOne(targetEntity="Author")
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="author_id", referencedColumnName="id", nullable=true)
+     * @ORM\JoinColumn(name="author_id",     referencedColumnName="id", nullable=true)
      * })
      */
     protected Author $author;

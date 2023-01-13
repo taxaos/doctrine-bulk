@@ -1,19 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
-namespace Taxaos\Exceptions;
+namespace DoctrineBulk\Exceptions;
 
-/**
- * Class WrongEntityException
- */
-final class WrongEntityException extends TaxaosException
+final class WrongEntityException extends DoctrineBulkBaseException
 {
-    /**
-     * WrongEntityException constructor.
-     *
-     * @param string $excepted
-     * @param object $actual
-     */
     public function __construct(string $excepted, object $actual)
     {
         parent::__construct(
@@ -21,6 +13,7 @@ final class WrongEntityException extends TaxaosException
                 'Bulk class created for "%s", but "%s" added.',
                 $excepted,
                 get_class($actual)
-            ));
+            )
+        );
     }
 }

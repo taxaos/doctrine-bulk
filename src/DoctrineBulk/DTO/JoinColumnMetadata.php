@@ -1,7 +1,8 @@
 <?php
-declare(strict_types = 1);
 
-namespace Taxaos\DTO;
+declare(strict_types=1);
+
+namespace DoctrineBulk\DTO;
 
 /**
  * Class JoinColumnMetadata
@@ -15,13 +16,11 @@ final class JoinColumnMetadata extends AbstractColumnMetadata
      *
      * @param string $referenced
      *
-     * @return JoinColumnMetadata
+     * @return void
      */
-    public function setReferenced(string $referenced): JoinColumnMetadata
+    public function setReferenced(string $referenced): void
     {
         $this->referenced = $referenced;
-
-        return $this;
     }
 
     /**

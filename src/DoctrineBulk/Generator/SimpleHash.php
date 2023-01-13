@@ -1,16 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
-namespace Taxaos\Generator;
+namespace DoctrineBulk\Generator;
 
-/**
- * Class SimpleHash
- */
 final class SimpleHash
 {
-    /**
-     * SimpleHash constructor.
-     */
     private function __construct()
     {
     }

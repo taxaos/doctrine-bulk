@@ -1,11 +1,9 @@
 <?php
-declare(strict_types = 1);
 
-namespace Taxaos\Generator;
+declare(strict_types=1);
 
-/**
- * Class HashesIdEntityInterface
- */
+namespace DoctrineBulk\Generator;
+
 interface HashedIdEntityInterface
 {
     /**
@@ -30,5 +28,5 @@ interface HashedIdEntityInterface
      *
      * @return mixed
      */
-    public function getHashGeneratorFieldValue(string $name, $value): mixed;
+    public function getHashGeneratorFieldValue(string $name, mixed $value): mixed;
 }

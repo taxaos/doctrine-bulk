@@ -1,16 +1,19 @@
 <?php
+
 declare(strict_types=1);
 
-namespace Taxaos\Bulk;
+namespace DoctrineBulk\Bulk;
 
-use Doctrine\DBAL\Exception as DoctrineBaseException;
+use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\Exception\TableNotFoundException;
+use Doctrine\DBAL\Types\ConversionException;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\UnitOfWork;
+use DoctrineBulk\Exceptions\FieldNotFoundException;
+use DoctrineBulk\Exceptions\NoDefaultValueException;
+use DoctrineBulk\Exceptions\NullValueException;
+use DoctrineBulk\Exceptions\WrongEntityException;
 use InvalidArgumentException;
-use Taxaos\Exceptions\FieldNotFoundException;
-use Taxaos\Exceptions\NoDefaultValueException;
-use Taxaos\Exceptions\NullValueException;
-use Taxaos\Exceptions\WrongEntityException;
 
 /**
  * Allows to upsert multiple doctrine entities to database.
@@ -23,17 +26,21 @@ class BulkUpsert extends AbstractBulk
 
     public const DEFAULT_ROWS = 1000;
 
-    /** @var array[] */
+    /**
+     * @var array<int, array<mixed, mixed>>
+     */
     private array $values = [];
 
     /**
      * Data.
      *
-     * @param array $data
+     * @param array<string, mixed> $data
      *
-     * @return BulkUpsert
+     * @return void
+     * @throws FieldNotFoundException
+     * @throws NullValueException
      */
-    public function addValue(array $data): BulkUpsert
+    public function addValue(array $data): void
     {
         foreach (array_keys($data) as $name) {
             if (!$this->metadata->hasField((string)$name)) {
@@ -41,15 +48,15 @@ class BulkUpsert extends AbstractBulk
             }
         }
         foreach ($this->metadata->getFields() as $field => $column) {
-            /** @noinspection NotOptimalIfConditionsInspection */
+            /**
+             * @noinspection NotOptimalIfConditionsInspection
+             */
             if (!$column->isNullable() && !array_key_exists($field, $data)) {
                 throw new NullValueException($this->class, $field);
             }
         }
 
         $this->values[] = $data;
-
-        return $this;
     }
 
     /**
@@ -57,12 +64,16 @@ class BulkUpsert extends AbstractBulk
      *
      * @param object $entity
      *
-     * @return BulkUpsert
+     * @return void
      *
+     * @throws FieldNotFoundException
+     * @throws NoDefaultValueException
      * @throws NullValueException
      * @throws WrongEntityException
+     * @throws \DoctrineBulk\Exceptions\MissingParentClassException
+     * @throws \ReflectionException
      */
-    public function addEntity(object $entity): BulkUpsert
+    public function addEntity(object $entity): void
     {
         if (get_class($entity) !== $this->class) {
             throw new WrongEntityException($this->class, $entity);
@@ -100,28 +111,24 @@ class BulkUpsert extends AbstractBulk
         $idFields = $this->metadata->getIdFields();
 
         foreach ($idFields as $idField) {
-            if ($generator !== null && null === $ret[$idField] ?? null) {
+            if ($generator !== null && null === $ret[$idField]) {
                 $ret[$idField] = $generator->generateBulk($this->manager, $this->class, $ret);
             }
         }
 
         $this->values[] = $ret;
-
-        return $this;
     }
 
-    private function isNewObject($entity): bool
+    private function isNewObject(object $entity): bool
     {
         try {
             return match ($this->manager->getUnitOfWork()->getEntityState($entity)) {
                 UnitOfWork::STATE_DETACHED, UnitOfWork::STATE_REMOVED, UnitOfWork::STATE_MANAGED => false,
-                UnitOfWork::STATE_NEW => true,
-                default => throw new InvalidArgumentException('Unexpected value'),
+                UnitOfWork::STATE_NEW => true
             };
-        } catch (DoctrineBaseException $exception) {
+        } catch (TableNotFoundException $exception) {
             return true;
         }
-
     }
 
     /**
@@ -130,10 +137,15 @@ class BulkUpsert extends AbstractBulk
      * @param int $flags
      * @param int $maxRows
      *
-     * @return string|null
+     * @return string|int|false|null
+     * @throws ConversionException
+     * @throws Exception
      */
-    public function execute(int $flags = self::FLAG_NONE, int $maxRows = self::DEFAULT_ROWS): ?string
+    public function execute(int $flags = self::FLAG_NONE, int $maxRows = self::DEFAULT_ROWS): string|int|false|null
     {
+        if ($maxRows < 1) {
+            throw new InvalidArgumentException('maxRows has to be at least 1');
+        }
         if (!count($this->values)) {
             return null;
         }
@@ -162,11 +174,13 @@ class BulkUpsert extends AbstractBulk
      * Executes insert to database and returns id of first inserted element.
      *
      * @param int $flags
-     * @param array $values
+     * @param array<int, array<mixed, mixed>> $values
      *
-     * @return string|null
+     * @return string|int|false|null
+     * @throws ConversionException
+     * @throws Exception
      */
-    private function executePartial(int $flags, array $values): ?string
+    private function executePartial(int $flags, array $values): string|int|false|null
     {
         $fields = $this->getAllUsedFields($values);
         $dbFields = array_map(
@@ -181,6 +195,9 @@ class BulkUpsert extends AbstractBulk
             $onDuplicateKeyParts[] = sprintf('%s=VALUES(%s)', $dbFieldName, $dbFieldName);
         }
 
+        if ($this->metadata->getTable() === null) {
+            throw new InvalidArgumentException('table cannot be null');
+        }
         $query = sprintf(
             'INSERT INTO %s (%s) VALUES %s ON DUPLICATE KEY UPDATE %s',
             $this->escape($this->metadata->getTable()),
@@ -188,7 +205,19 @@ class BulkUpsert extends AbstractBulk
                 ', ',
                 $dbFields
             ),
-            trim(str_repeat(sprintf('(%s), ', implode(', ', array_fill(0, count($fields), '?'))), count($values)), ', '),
+            trim(
+                str_repeat(
+                    sprintf(
+                        '(%s), ',
+                        implode(
+                            ', ',
+                            array_fill(0, count($fields), '?')
+                        )
+                    ),
+                    count($values)
+                ),
+                ', '
+            ),
             implode(', ', $onDuplicateKeyParts)
         );
 
@@ -200,7 +229,8 @@ class BulkUpsert extends AbstractBulk
                 $index++;
                 $value = $row[$name] ?? null;
                 if (
-                    in_array($name, $this->metadata->getIdFields(), true) && $generate = $this->metadata->getGenerator()) {
+                    in_array($name, $this->metadata->getIdFields(), true) && $generate = $this->metadata->getGenerator()
+                ) {
                     $value = $generate->generateBulk($this->manager, $this->class, $row);
                 }
                 $this->bind($statement, $index, $this->metadata->getField($name), $value);
@@ -209,22 +239,14 @@ class BulkUpsert extends AbstractBulk
 
         $statement->executeQuery();
 
-        $noLastId = ($flags & self::FLAG_NO_RETURN_ID) === self::FLAG_NO_RETURN_ID || $this->metadata->getGenerator() !== null;
+        $noLastId = ($flags & self::FLAG_NO_RETURN_ID) === self::FLAG_NO_RETURN_ID
+            || $this->metadata->getGenerator() !== null;
 
-        return $noLastId ? null : $this->manager->getConnection()->lastInsertId();
-    }
+        if ($noLastId) {
+            return null;
+        }
 
-    private function a(array $fields)
-    {
-        return implode(
-            ', ',
-            array_map(
-                function (string $column) {
-                    return $this->escape($this->metadata->getField($column)->getName());
-                },
-                $fields
-            )
-        );
+        return $this->manager->getConnection()->lastInsertId();
     }
 
     /**

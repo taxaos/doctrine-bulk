@@ -1,16 +1,19 @@
 <?php
+
 declare(strict_types=1);
 
-namespace Taxaos\DTO;
+namespace DoctrineBulk\DTO;
 
-use Taxaos\Generator\BulkGeneratorInterface;
+use DoctrineBulk\Generator\BulkGeneratorInterface;
 
 /**
  * Class MetadataDto
  */
 final class Metadata
 {
-    /** @var ColumnMetadataInterface[] */
+    /**
+     * @var ColumnMetadataInterface[]
+     */
     private array $fields = [];
 
     /**
@@ -20,6 +23,9 @@ final class Metadata
 
     private ?BulkGeneratorInterface $generator = null;
 
+    /**
+     * @var array<string, string[]>
+     */
     private array $lifeCycleCallBacks;
 
     public function __construct(private ?string $table = null)
@@ -31,18 +37,9 @@ final class Metadata
         return $this->table;
     }
 
-    public function setTable(string $table): Metadata
-    {
-        $this->table = $table;
-
-        return $this;
-    }
-
-    public function addField(string $field, ColumnMetadataInterface $column): Metadata
+    public function addField(string $field, ColumnMetadataInterface $column): void
     {
         $this->fields[$field] = $column;
-
-        return $this;
     }
 
     /**
@@ -86,14 +83,12 @@ final class Metadata
     }
 
     /**
-     * @param array<int, string> $idFields
-     * @return $this
+     * @param  array<int, string> $idFields
+     * @return void
      */
-    public function setIdFields(array $idFields): Metadata
+    public function setIdFields(array $idFields): void
     {
         $this->idFields = $idFields;
-
-        return $this;
     }
 
     public function getGenerator(): ?BulkGeneratorInterface
@@ -101,20 +96,21 @@ final class Metadata
         return $this->generator;
     }
 
-    public function setGenerator(?BulkGeneratorInterface $generator): Metadata
+    public function setGenerator(?BulkGeneratorInterface $generator): void
     {
         $this->generator = $generator;
-
-        return $this;
     }
 
+    /**
+     * @return array<string, string[]>
+     */
     public function getLifeCycleCallBacks(): array
     {
         return $this->lifeCycleCallBacks;
     }
 
     /**
-     * @param array $lifeCycleCallBacks
+     * @param array<string, string[]> $lifeCycleCallBacks
      */
     public function setLifeCycleCallBacks(array $lifeCycleCallBacks): void
     {
