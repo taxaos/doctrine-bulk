@@ -1,6 +1,6 @@
 {
     "name": "taxaos/doctrine-bulk",
-    "description": "Simple classes that allows bulk operations on doctrine entities.",
+    "description": "Simple classes that allows bulk operations on doctrine entities (only mySQL upsert supported)",
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -23,7 +23,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Taxaos\\": "src/Taxaos",
+            "DoctrineBulk\\": "src/DoctrineBulk",
             "Tests\\": "tests/"
         }
     },

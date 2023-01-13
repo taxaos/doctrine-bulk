@@ -1,15 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace Taxaos\Exceptions;
+namespace DoctrineBulk\Exceptions;
 
-use Taxaos\Generator\HashedIdEntityInterface;
-use Taxaos\Generator\HashedIdGenerator;
+use DoctrineBulk\Generator\HashedIdEntityInterface;
+use DoctrineBulk\Generator\HashedIdGenerator;
 
 /**
  * Class EntityNotSupportedException
  */
-final class EntityNotSupportedException extends TaxaosException
+final class EntityNotSupportedException extends DoctrineBulkBaseException
 {
     /**
      * EntityNotSupportedException constructor.

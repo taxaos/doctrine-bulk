@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Tests\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Taxaos\Generator\HashedIdEntityInterface;
+use DoctrineBulk\Generator\HashedIdEntityInterface;
 
 /**
  * Class Author
@@ -18,7 +18,7 @@ class Author implements HashedIdEntityInterface
      * @ORM\Column(name="id", type="string", length=25, nullable=false)
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="CUSTOM")
-     * @ORM\CustomIdGenerator(class="Taxaos\Generator\HashedIdGenerator")
+     * @ORM\CustomIdGenerator(class="DoctrineBulk\Generator\HashedIdGenerator")
      */
     protected string $id;
 

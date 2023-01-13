@@ -1,23 +1,24 @@
 <?php
-declare(strict_types = 1);
+declare(strict_types=1);
 
-namespace Taxaos\Bulk;
+namespace DoctrineBulk\Bulk;
 
-use Doctrine\DBAL\Statement;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Schema\Identifier;
+use Doctrine\DBAL\Statement;
 use Doctrine\DBAL\Types\ConversionException;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManagerInterface;
+use DoctrineBulk\DTO\ColumnMetadataInterface;
+use DoctrineBulk\DTO\JoinColumnMetadata;
+use DoctrineBulk\DTO\Metadata;
+use DoctrineBulk\Exceptions\FieldNotFoundException;
+use DoctrineBulk\Exceptions\MissingParentClassException;
+use DoctrineBulk\Exceptions\NotSupportedIdGeneratorException;
 use PDO;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionProperty;
-use Taxaos\DTO\ColumnMetadataInterface;
-use Taxaos\DTO\JoinColumnMetadata;
-use Taxaos\DTO\Metadata;
-use Taxaos\Exceptions\FieldNotFoundException;
-use Taxaos\Exceptions\NotSupportedIdGeneratorException;
 
 /**
  * Class AbstractBulk
@@ -49,9 +50,10 @@ abstract class AbstractBulk
      */
     public function __construct(EntityManagerInterface $manager, string $class)
     {
-        $this->manager    = $manager;
-        $this->class      = $class;
-        $this->metadata   = MetadataLoader::load($manager->getClassMetadata($class));
+        $this->manager = $manager;
+        $this->class = $class;
+        $this->metadata = MetadataLoader::load($manager->getClassMetadata($class));
+        // @phpstan-ignore-next-line
         $this->reflection = new ReflectionClass($class);
     }
 
@@ -59,7 +61,7 @@ abstract class AbstractBulk
      * Search property in class or it's subclasses and make it accessible.
      *
      * @param ReflectionClass $class
-     * @param string           $name
+     * @param string $name
      *
      * @return ReflectionProperty
      *
@@ -86,30 +88,27 @@ abstract class AbstractBulk
      * Get the value of a property from a class or subclass.
      *
      * @param ReflectionClass $class
-     * @param string           $name
-     * @param mixed            $object
+     * @param string $name
+     * @param object $object
      *
      * @return ClassValue
      *
      * @throws FieldNotFoundException|ReflectionException
+     * @throws MissingParentClassException
      */
-    protected function getClassValue(ReflectionClass $class, string $name, $object): ClassValue
+    protected function getClassValue(ReflectionClass $class, string $name, object $object): ClassValue
     {
         // Embeded properties are in dot notaion
-        if (str_contains($name, '.'))
-        {
+        if (str_contains($name, '.')) {
             $parts = explode('.', $name);
             $classValue = $this->getClassValue($class, $parts[0], $object);
-            if (!$classValue->isInitialised())
-            {
+            if (!$classValue->isInitialised()) {
                 return $classValue;
             }
-            for ($i = 1, $iMax = count($parts); $i < $iMax; ++$i)
-            {
+            for ($i = 1, $iMax = count($parts); $i < $iMax; ++$i) {
                 $oldValue = $classValue->getValue();
                 $classValue = $this->getClassValue(new ReflectionClass($oldValue), $parts[$i], $oldValue);
-                if (!$classValue->isInitialised())
-                {
+                if (!$classValue->isInitialised()) {
                     return $classValue;
                 }
             }
@@ -117,32 +116,30 @@ abstract class AbstractBulk
             return $classValue;
         }
 
-        if ($class->hasProperty($name))
-        {
+        if ($class->hasProperty($name)) {
             $property = $class->getProperty($name);
             $property->setAccessible(true);
-            if (!$property->isInitialized($object))
-            {
+            if (!$property->isInitialized($object)) {
                 return ClassValue::notInitialised();
             }
 
             return ClassValue::initialised($property->getValue($object));
         }
 
-        $subClass = $class->getParentClass();
-        if (!$class) {
-            throw new FieldNotFoundException($class->getName(), $name);
+        $parentClass = $class->getParentClass();
+        if ($parentClass === false) {
+            throw new MissingParentClassException(sprintf('ParentClass for %s missing', get_class($class)));
         }
 
-        return $this->getClassValue($subClass, $name, $object);
+        return $this->getClassValue($parentClass, $name, $object);
     }
 
     /**
      * Get all fields used in request.
      *
-     * @param array $values
+     * @param array<mixed, mixed> $values
      *
-     * @return array
+     * @return array<int, mixed>
      */
     protected function getAllUsedFields(array &$values): array
     {
@@ -168,7 +165,7 @@ abstract class AbstractBulk
     {
         $type = PDO::PARAM_STR;
         if (Type::hasType($column->getType())) {
-            $type  = Type::getType($column->getType());
+            $type = Type::getType($column->getType());
             $value = $type->convertToDatabaseValue(
                 $value,
                 $this->manager->getConnection()->getDatabasePlatform()
@@ -183,30 +180,27 @@ abstract class AbstractBulk
      * Extract joined entity value, if entity is really joined.
      *
      * @param ColumnMetadataInterface $column
-     * @param ClassValue              $classValue
-     * @param string                  $field
+     * @param ClassValue $classValue
+     * @param string $field
      *
      * @return ClassValue
      *
      * @throws FieldNotFoundException|ReflectionException
      */
-    protected function getJoinedEntityValue(ColumnMetadataInterface $column, ClassValue $classValue, string $field) : ClassValue
+    protected function getJoinedEntityValue(ColumnMetadataInterface $column, ClassValue $classValue, string $field): ClassValue
     {
-        if (!$classValue->isInitialised())
-        {
+        if (!$classValue->isInitialised()) {
             return $classValue;
         }
 
         $value = $classValue->getValue();
 
-        if (!($column instanceof JoinColumnMetadata) || !is_object($value))
-        {
+        if (!($column instanceof JoinColumnMetadata) || !is_object($value)) {
             return $classValue;
         }
 
         $subPropName = $field . '.' . $column->getReferenced();
-        if (!array_key_exists($subPropName, $this->cachedReflProps))
-        {
+        if (!array_key_exists($subPropName, $this->cachedReflProps)) {
             $this->cachedReflProps[$subPropName] = $this->getClassProperty(
                 new ReflectionClass($value),
                 $column->getReferenced()
@@ -215,8 +209,7 @@ abstract class AbstractBulk
         }
 
         $prop = $this->cachedReflProps[$subPropName];
-        if (!$prop->isInitialized($value))
-        {
+        if (!$prop->isInitialized($value)) {
             return ClassValue::notInitialised();
         }
 

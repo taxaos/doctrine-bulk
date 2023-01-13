@@ -5,6 +5,7 @@ namespace Tests;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\Tools\Setup;
 use PHPUnit\Framework\TestCase;
 
@@ -17,6 +18,7 @@ abstract class AbstractBulkTest extends TestCase
      * Create new entity manager.
      *
      * @return EntityManagerInterface
+     * @throws ORMException
      */
     protected function getManager(): EntityManagerInterface
     {

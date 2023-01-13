@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Taxaos\Exceptions;
+namespace DoctrineBulk\Exceptions;
 
 /**
  * Class CannotGenerateIdException
  */
-final class CannotGenerateIdException extends TaxaosException
+final class CannotGenerateIdException extends DoctrineBulkBaseException
 {
     /**
      * CannotGenerateIdException constructor.

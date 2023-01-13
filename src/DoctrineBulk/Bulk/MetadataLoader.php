@@ -1,15 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace Taxaos\Bulk;
+namespace DoctrineBulk\Bulk;
 
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
-use Taxaos\DTO\ColumnMetadata;
-use Taxaos\DTO\JoinColumnMetadata;
-use Taxaos\DTO\Metadata;
-use Taxaos\Exceptions\NotSupportedIdGeneratorException;
-use Taxaos\Generator\BulkGeneratorInterface;
+use DoctrineBulk\DTO\ColumnMetadata;
+use DoctrineBulk\DTO\JoinColumnMetadata;
+use DoctrineBulk\DTO\Metadata;
+use DoctrineBulk\Exceptions\NotSupportedIdGeneratorException;
+use DoctrineBulk\Generator\BulkGeneratorInterface;
 
 /**
  * Class MetadataLoader
@@ -35,6 +35,7 @@ final class MetadataLoader
      * @param ClassMetadata $metadata
      *
      * @return Metadata
+     * @throws NotSupportedIdGeneratorException
      */
     public static function load(ClassMetadata $metadata): Metadata
     {
@@ -62,7 +63,7 @@ final class MetadataLoader
 
             $defaultValue = null;
             if (!$isIdField && $hasDefault) {
-                $defaultValue = $mapping['options']['default'];
+                $defaultValue = $mapping['options']['default'] ?? null;
             }
             $bulkMetadata->addField(
                 $field,
@@ -94,7 +95,7 @@ final class MetadataLoader
                 continue; // looks broken...
             }
             // ONE_TO_ONE  does not have the 'nullable' key, but creates tables that are nullable
-            $nullable = $association['type'] === ClassMetadataInfo::ONE_TO_ONE || $column['nullable'];
+            $nullable = $association['type'] === ClassMetadataInfo::ONE_TO_ONE || (isset($column['nullable']) && $column['nullable']);
             $defaultValue = null;
             $joinColumnMetadata = new JoinColumnMetadata(
                 $column['name'],
@@ -104,9 +105,11 @@ final class MetadataLoader
                 $defaultValue
             );
 
+            $joinColumnMetadata->setReferenced($column['referencedColumnName']);
+
             $bulkMetadata->addField(
                 $association['fieldName'],
-                $joinColumnMetadata->setReferenced($column['referencedColumnName'])
+                $joinColumnMetadata
             );
         }
 

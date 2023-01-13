@@ -1,9 +1,9 @@
 <?php
 declare(strict_types = 1);
 
-namespace Taxaos\Exceptions;
+namespace DoctrineBulk\Exceptions;
 
-final class NoDefaultValueException extends TaxaosException
+final class NoDefaultValueException extends DoctrineBulkBaseException
 {
     public function __construct(string $name, string $class)
     {

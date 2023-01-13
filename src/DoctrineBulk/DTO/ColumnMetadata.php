@@ -1,7 +1,7 @@
 <?php
 declare(strict_types = 1);
 
-namespace Taxaos\DTO;
+namespace DoctrineBulk\DTO;
 
 /**
  * Class ColumnMetadata

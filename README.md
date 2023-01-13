@@ -18,8 +18,8 @@ Forked from https://github.com/6dreams/doctrine-bulk
 declare(strict_types = 1);
 
 use \Doctrine\ORM\EntityManagerInterface;
-use \Taxaos\Bulk\BulkInsert;
-use \Taxaos\Bulk\BulkUpdate;
+use \DoctrineBulk\Bulk\BulkInsert;
+use \DoctrineBulk\Bulk\BulkUpdate;
 
 /**
  * Class DbWrite

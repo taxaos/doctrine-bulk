@@ -1,19 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace Taxaos\Exceptions;
+namespace DoctrineBulk\Exceptions;
 
-/**
- * Class WrongEntityException
- */
-final class WrongEntityException extends TaxaosException
+final class WrongEntityException extends DoctrineBulkBaseException
 {
-    /**
-     * WrongEntityException constructor.
-     *
-     * @param string $excepted
-     * @param object $actual
-     */
     public function __construct(string $excepted, object $actual)
     {
         parent::__construct(

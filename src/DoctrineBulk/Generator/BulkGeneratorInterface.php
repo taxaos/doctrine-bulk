@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Taxaos\Generator;
+namespace DoctrineBulk\Generator;
 
 use Doctrine\ORM\EntityManagerInterface;
 

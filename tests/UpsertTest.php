@@ -4,17 +4,15 @@ declare(strict_types=1);
 namespace Tests;
 
 use DateTime;
+use DoctrineBulk\Bulk\BulkUpsert;
+use DoctrineBulk\Exceptions\FieldNotFoundException;
+use DoctrineBulk\Exceptions\NullValueException;
 use ReflectionClass;
-use Taxaos\Bulk\BulkUpsert;
-use Taxaos\Exceptions\FieldNotFoundException;
-use Taxaos\Exceptions\NullValueException;
+use ReflectionException;
 use Tests\Entity\Author;
 use Tests\Entity\Book;
 use Tests\Entity\Magazine;
 
-/**
- * Class TestDoctrineBoot
- */
 class UpsertTest extends AbstractBulkTest
 {
     /**
@@ -24,11 +22,21 @@ class UpsertTest extends AbstractBulkTest
     {
         $manager = $this->getManager();
 
-        $author = (new Author())->setId('jnweifohg0934hgh')->setFullName('full namez')->setOtherData('random stuff');
-        $book = (new Book())->setAuthor($author)->setTitle('random_text');
+        $author = new Author();
+        $author->setId('jnweifohg0934hgh');
+        $author->setFullName('full namez');
+        $author->setOtherData('random stuff');
+        $book = new Book();
+        $book->setAuthor($author);
+        $book->setTitle('random_text');
 
         $bulk = new BulkUpsert($manager, Author::class);
-        $bulk->addEntity((new Author())->setFullName('full namez')->setOtherData('random stuff'));
+
+        $author2 = new Author();
+        $author2->setFullName('full namez');
+        $author2->setOtherData('random stuff');
+        $bulk->addEntity($author2);
+
         self::assertEquals(
             [
                 ['id' => 'akwkorfmq0w0kg8scsgsos4c0',
@@ -61,11 +69,23 @@ class UpsertTest extends AbstractBulkTest
     {
         $manager = $this->getManager();
 
-        $author = (new Author())->setId('jnweifohg0934hgh')->setFullName('full namez')->setOtherData('random stuff');
-        $magazine = (new Magazine())->setYear(2022)->setMonth(10)->setAuthor($author)->setTitle('random_text');
+        $author = new Author();
+        $author->setId('jnweifohg0934hgh');
+        $author->setFullName('full namez');
+        $author->setOtherData('random stuff');
+
+        $magazine = new Magazine();
+        $magazine->setYear(2022);
+        $magazine->setMonth(10);
+        $magazine->setAuthor($author);
+        $magazine->setTitle('random_text');
 
         $bulk = new BulkUpsert($manager, Author::class);
-        $bulk->addEntity((new Author())->setFullName('full namez')->setOtherData('random stuff'));
+        $author2 = new Author();
+        $author2->setFullName('full namez');
+        $author2->setOtherData('random stuff');
+
+        $bulk->addEntity($author2);
         self::assertEquals(
             [
                 [
@@ -105,8 +125,8 @@ class UpsertTest extends AbstractBulkTest
 
         $data = ['fullName' => 'full namez', 'otherData' => 'random stuff'];
 
-        $bulk = (new BulkUpsert($manager, Author::class))
-            ->addValue($data);
+        $bulk = new BulkUpsert($manager, Author::class);
+        $bulk->addValue($data);
 
         self::assertEquals([$data], $this->extractField($bulk, 'values'));
     }
@@ -118,8 +138,8 @@ class UpsertTest extends AbstractBulkTest
     {
         $this->expectException(NullValueException::class);
 
-        (new BulkUpsert($this->getManager(), Author::class))
-            ->addValue(['otherData' => '']);
+        $bulk = new BulkUpsert($this->getManager(), Author::class);
+        $bulk->addValue(['otherData' => '']);
     }
 
     /**
@@ -129,8 +149,8 @@ class UpsertTest extends AbstractBulkTest
     {
         $this->expectException(FieldNotFoundException::class);
 
-        (new BulkUpsert($this->getManager(), Author::class))
-            ->addValue(['dno' => '']);
+        $bulk = new BulkUpsert($this->getManager(), Author::class);
+        $bulk->addValue(['dno' => '']);
     }
 
     /**
@@ -140,6 +160,7 @@ class UpsertTest extends AbstractBulkTest
      * @param string $name
      *
      * @return mixed
+     * @throws ReflectionException
      */
     protected function extractField(object $class, string $name): mixed
     {

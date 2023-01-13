@@ -1,19 +1,13 @@
 <?php
 declare(strict_types = 1);
 
-namespace Taxaos\Exceptions;
+namespace DoctrineBulk\Exceptions;
 
 /**
  * Class FieldNotFoundException
  */
-final class FieldNotFoundException extends TaxaosException
+final class FieldNotFoundException extends DoctrineBulkBaseException
 {
-    /**
-     * FieldNotFoundException constructor.
-     *
-     * @param string $entity
-     * @param string $field
-     */
     public function __construct(string $entity, string $field)
     {
         parent::__construct(sprintf('Field "%s" not found in "%s"!', $field, $entity));

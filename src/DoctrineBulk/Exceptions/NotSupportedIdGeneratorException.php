@@ -1,20 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Taxaos\Exceptions;
+namespace DoctrineBulk\Exceptions;
 
-use Taxaos\Generator\BulkGeneratorInterface;
+use DoctrineBulk\Generator\BulkGeneratorInterface;
 
-/**
- * Class NotSupportedIdGeneratorException
- */
-final class NotSupportedIdGeneratorException extends TaxaosException
+final class NotSupportedIdGeneratorException extends DoctrineBulkBaseException
 {
-    /**
-     * NotSupportedIdGeneratorException constructor.
-     *
-     * @param object $name
-     */
     public function __construct(object $name)
     {
         parent::__construct(

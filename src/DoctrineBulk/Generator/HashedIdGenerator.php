@@ -1,22 +1,20 @@
 <?php
 declare(strict_types=1);
 
-namespace Taxaos\Generator;
+namespace DoctrineBulk\Generator;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Id\AbstractIdGenerator;
 use InvalidArgumentException;
-use Taxaos\Exceptions\CannotGenerateIdException;
-use Taxaos\Exceptions\EntityNotSupportedException;
+use DoctrineBulk\Exceptions\CannotGenerateIdException;
+use DoctrineBulk\Exceptions\EntityNotSupportedException;
 
-/**
- * Class HashedIdGenerator
- */
 class HashedIdGenerator extends AbstractIdGenerator implements BulkGeneratorInterface
 {
     /**
      * @inheritdoc
+     * @throws EntityNotSupportedException
      */
     public function generate(EntityManager $em, $entity): string
     {
@@ -32,6 +30,7 @@ class HashedIdGenerator extends AbstractIdGenerator implements BulkGeneratorInte
 
     /**
      * @inheritdoc
+     * @throws EntityNotSupportedException|CannotGenerateIdException
      */
     public function generateBulk(EntityManagerInterface $manager, string $class, array $entity): string
     {

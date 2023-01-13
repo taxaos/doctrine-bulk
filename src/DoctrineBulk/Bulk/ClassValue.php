@@ -1,7 +1,7 @@
 <?php
 declare(strict_types = 1);
 
-namespace Taxaos\Bulk;
+namespace DoctrineBulk\Bulk;
 
 /**
  * Helper class for storing the value of a property from a class or subclass.
