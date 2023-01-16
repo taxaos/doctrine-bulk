@@ -36,7 +36,7 @@ class UpsertTest extends AbstractBulkTest
         $author2 = new Author();
         $author2->setFullName('full namez');
         $author2->setOtherData('random stuff');
-        $bulk->addEntity($author2);
+        $bulk->addEntity($author2, false);
 
         self::assertEquals(
             [
@@ -49,7 +49,7 @@ class UpsertTest extends AbstractBulkTest
         );
 
         $bulk = new BulkUpsert($manager, Book::class);
-        $bulk->addEntity($book);
+        $bulk->addEntity($book, false);
 
         self::assertEquals(
             [
@@ -86,7 +86,7 @@ class UpsertTest extends AbstractBulkTest
         $author2->setFullName('full namez');
         $author2->setOtherData('random stuff');
 
-        $bulk->addEntity($author2);
+        $bulk->addEntity($author2, false);
         self::assertEquals(
             [
                 [
@@ -100,7 +100,7 @@ class UpsertTest extends AbstractBulkTest
 
         $bulk = new BulkUpsert($manager, Magazine::class);
 
-        $bulk->addEntity($magazine);
+        $bulk->addEntity($magazine, false);
 
         self::assertEquals(
             [

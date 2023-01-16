@@ -10,10 +10,12 @@ use Doctrine\DBAL\Types\ConversionException;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\UnitOfWork;
 use DoctrineBulk\Exceptions\FieldNotFoundException;
+use DoctrineBulk\Exceptions\MissingParentClassException;
 use DoctrineBulk\Exceptions\NoDefaultValueException;
 use DoctrineBulk\Exceptions\NullValueException;
 use DoctrineBulk\Exceptions\WrongEntityException;
 use InvalidArgumentException;
+use ReflectionException;
 
 /**
  * Allows to upsert multiple doctrine entities to database.
@@ -63,17 +65,17 @@ class BulkUpsert extends AbstractBulk
      * Adds entity to persist queue.
      *
      * @param object $entity
-     *
+     * @param bool $detach
      * @return void
      *
      * @throws FieldNotFoundException
+     * @throws MissingParentClassException
      * @throws NoDefaultValueException
      * @throws NullValueException
+     * @throws ReflectionException
      * @throws WrongEntityException
-     * @throws \DoctrineBulk\Exceptions\MissingParentClassException
-     * @throws \ReflectionException
      */
-    public function addEntity(object $entity): void
+    public function addEntity(object $entity, bool $detach): void
     {
         if (get_class($entity) !== $this->class) {
             throw new WrongEntityException($this->class, $entity);
@@ -116,6 +118,13 @@ class BulkUpsert extends AbstractBulk
             }
         }
 
+        if ($detach) {
+            try {
+                $this->manager->detach($entity);
+            } catch (Exception) {
+                // intentionally ignored
+            }
+        }
         $this->values[] = $ret;
     }
 
@@ -126,7 +135,7 @@ class BulkUpsert extends AbstractBulk
                 UnitOfWork::STATE_DETACHED, UnitOfWork::STATE_REMOVED, UnitOfWork::STATE_MANAGED => false,
                 UnitOfWork::STATE_NEW => true
             };
-        } catch (TableNotFoundException $exception) {
+        } catch (TableNotFoundException) {
             return true;
         }
     }
